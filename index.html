@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/0.71/jquery.csv-0.71.min.js"></script>
+    <script type="text/javascript">  
+        $(document).ready(function() {
+
+        // The event listener for the file upload
+        document.getElementById('txtFileUpload').addEventListener('change', upload, false);
+
+        // Method that checks that the browser supports the HTML5 File API
+        function browserSupportFileUpload() {
+          return (window.File && window.FileReader && window.FileList && window.Blob);
+        }
+
+        // Method that reads and processes the selected file
+        function upload(evt) {
+          if (!browserSupportFileUpload()) {
+              alert('The File APIs are not fully supported in this browser!');
+            } else {
+              var data = null;
+              var error;
+              var file = evt.target.files[0];
+              var reader = new FileReader();
+
+              reader.readAsText(file);
+
+              reader.onload = function(event) {
+                var csvData = event.target.result;
+                try {
+                  data = $.csv.toArrays(csvData);
+                } catch (e) {
+                  error = e;
+                  data = [];
+                }
+                if (data && data.length) {
+                  $('#result').text(JSON.stringify(data, 2));
+                } else if (error) {
+                  $('#result').text(error.toString());
+                } else {
+                  $('#result').text('No data to import');
+                }
+              };
+              reader.onerror = function() {
+                $('#result').text('Unable to read ' + file.fileName);
+              };
+            }
+          }
+        });
+    </script>
+    </head>
+    <body>
+      <div id="dvImportSegments" class="fileupload ">
+        <fieldset>
+          <legend>Upload your CSV File</legend>
+          <input type="file" name="File Upload" id="txtFileUpload" accept=".csv" />
+        </fieldset>
+      </div>
+      <h4>Result</h4>
+      <div id="result"></div>
+    </body>
+</html>
